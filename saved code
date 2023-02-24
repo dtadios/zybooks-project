@@ -1,0 +1,60 @@
+from game_settings import *
+
+board_copy = board[:]
+
+for lst in range(len(board_copy)):                                           #print out initial board
+    for index, element in enumerate(board_copy[lst]):                        
+        print(f'{element} ', end='')
+    print()
+print()
+
+player_input = input()
+
+while player_input != QUIT:
+    if player_input in CONTROLS:
+        if player_input == "d":                                         # d input
+            for d_lst in board:
+                for d_index, d_element in enumerate(d_lst):             
+                    if d_lst[d_index] == SPRITE and d_lst[d_index + 1] == EMPTY:    # move right into empty space                
+                        d_lst[d_index + 1] = SPRITE                     # might need to account for when sprite is on the very right side of board
+                        d_lst[d_index] = EMPTY
+                        break
+                    elif d_lst[d_index] == SPRITE and d_lst[d_index + 1] == BOX_NS and d_lst[d_index + 1 + 1] != WALL:                    
+                        if d_lst[d_index + 1 + 1] == EMPTY:             # move right and move box into empty space 
+                            d_lst[d_index + 1 + 1] = BOX_NS
+                            d_lst[d_index + 1] = SPRITE
+                            d_lst[d_index] = EMPTY
+                        elif d_lst[d_index + 1 + 1] == TARGET:          # move right and move box into target
+                            d_lst[d_index + 1 + 1] = BOX_S
+                            d_lst[d_index + 1] = SPRITE
+                            d_lst[d_index] = EMPTY
+                        break
+                    elif d_lst[d_index] == SPRITE and d_lst[d_index + 1] == BOX_S and d_lst[d_index + 1 + 1] != WALL: 
+                        d_lst[d_index + 1 + 1] = BOX_NS                 # move right and move box out of target
+                        d_lst[d_index + 1] = SPRITE_T
+                        d_lst[d_index] = EMPTY
+                        break
+        for lst in range(len(board_copy)):                                  
+            for index, element in enumerate(board_copy[lst]):                        
+                print(f'{element} ', end='')
+            print()
+        print()
+        player_input = input()                                           #print board after every every input that's not QUIT
+    else:
+        player_input = input('enter a valid move:\n')
+
+if player_input == QUIT:
+    print('\nGoodbye')                    
+
+
+
+# for lst in range(len(board_copy)):                                  #print out initial board
+#     for index, element in enumerate(board_copy[lst]):                        
+#         print(f'{element} ', end='')
+#     print()
+
+
+                        
+
+
+
