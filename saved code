@@ -1,60 +1,263 @@
 from game_settings import *
 
-board_copy = board[:]
+import copy
 
-for lst in range(len(board_copy)):                                           #print out initial board
-    for index, element in enumerate(board_copy[lst]):                        
-        print(f'{element} ', end='')
+board_copy = copy.deepcopy(board)                               # create deep copy of board
+
+
+for lst in range(len(board)):                                  # print out initial board without space at end
+    for i, e in enumerate(board[lst]):
+        last_occur = max(i for i, e in enumerate(board[lst]) if e == WALL)
+        if i == last_occur:
+            print(f'{e}', end='')
+        else:
+            print(f'{e} ', end='')
     print()
 print()
 
-player_input = input()
+number_targets = 0
+
+for i in board:
+    for e in i:
+        if e == TARGET:
+            number_targets += 1
+                                                                        # figure out how to code different boards
+player_input = input()                                                  # take first player input
 
 while player_input != QUIT:
-    if player_input in CONTROLS:
-        if player_input == "d":                                         # d input
-            for d_lst in board:
+    if player_input == RESTART:
+        board_copy = copy.deepcopy(board)
+        for lst in range(len(board)):                                  # print out initial board without space at end
+            for i, e in enumerate(board[lst]):
+                last_occur = max(i for i, e in enumerate(board[lst]) if e == WALL)
+                if i == last_occur:
+                    print(f'{e}', end='')
+                else:
+                    print(f'{e} ', end='')
+            print()
+        print()
+        number_targets = 0
+
+        for i in board:
+            for e in i:
+                if e == TARGET:
+                    number_targets += 1
+        player_input = input()
+    elif player_input in CONTROLS and player_input != RESTART:
+        c = True
+        if player_input == "d":                                         # d input; might need to change to the index of the string
+            for d_lst in board_copy:
                 for d_index, d_element in enumerate(d_lst):             
-                    if d_lst[d_index] == SPRITE and d_lst[d_index + 1] == EMPTY:    # move right into empty space                
+                    if (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index + 1] == EMPTY:    # move right into empty space                
                         d_lst[d_index + 1] = SPRITE                     # might need to account for when sprite is on the very right side of board
-                        d_lst[d_index] = EMPTY
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] = TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
                         break
-                    elif d_lst[d_index] == SPRITE and d_lst[d_index + 1] == BOX_NS and d_lst[d_index + 1 + 1] != WALL:                    
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index + 1] == EMPTY:
+                        d_lst[d_index + 1] = SPRITE
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] = TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
+                        break
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index + 1] == BOX_NS and d_lst[d_index + 1 + 1] != WALL:                    
                         if d_lst[d_index + 1 + 1] == EMPTY:             # move right and move box into empty space 
                             d_lst[d_index + 1 + 1] = BOX_NS
                             d_lst[d_index + 1] = SPRITE
-                            d_lst[d_index] = EMPTY
+                            if d_lst[d_index] == SPRITE_T:
+                                d_lst[d_index] = TARGET
+                            else:
+                                d_lst[d_index] = EMPTY
                         elif d_lst[d_index + 1 + 1] == TARGET:          # move right and move box into target
                             d_lst[d_index + 1 + 1] = BOX_S
+                            number_targets -= 1
                             d_lst[d_index + 1] = SPRITE
+                            if d_lst[d_index] == SPRITE_T:
+                                d_lst[d_index] = TARGET
+                            else:
+                                d_lst[d_index] = EMPTY
                             d_lst[d_index] = EMPTY
                         break
-                    elif d_lst[d_index] == SPRITE and d_lst[d_index + 1] == BOX_S and d_lst[d_index + 1 + 1] != WALL: 
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index + 1] == BOX_S and d_lst[d_index + 1 + 1] != WALL: 
                         d_lst[d_index + 1 + 1] = BOX_NS                 # move right and move box out of target
+                        number_targets += 1
                         d_lst[d_index + 1] = SPRITE_T
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] = TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
                         d_lst[d_index] = EMPTY
                         break
-        for lst in range(len(board_copy)):                                  
-            for index, element in enumerate(board_copy[lst]):                        
-                print(f'{element} ', end='')
+                    
+        elif player_input == "a":                                         # a input (same as d input but replaced +'s with -'s)
+            for d_lst in board_copy:
+                for d_index, d_element in enumerate(d_lst):             
+                    if (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index - 1] == EMPTY:
+                        d_lst[d_index - 1] = SPRITE                     #move left into exmpty space
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] = TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
+                        break
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index - 1] == EMPTY:
+                        d_lst[d_index - 1] = SPRITE
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] = TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
+                        break
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index - 1] == BOX_NS and d_lst[d_index - 1 - 1] != WALL:                    
+                        if d_lst[d_index - 1 - 1] == EMPTY:             # move left and move box into empty space 
+                            d_lst[d_index - 1 - 1] = BOX_NS
+                            d_lst[d_index - 1] = SPRITE
+                            if d_lst[d_index] == SPRITE_T:
+                                d_lst[d_index] = TARGET
+                            else:
+                                d_lst[d_index] = EMPTY
+                        elif d_lst[d_index - 1 - 1] == TARGET:          # move left and move box into target
+                            d_lst[d_index - 1 - 1] = BOX_S
+                            number_targets -= 1
+                            d_lst[d_index - 1] = SPRITE
+                            if d_lst[d_index] == SPRITE_T:
+                                d_lst[d_index] = TARGET
+                            else:
+                                d_lst[d_index] = EMPTY
+                        break
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and d_lst[d_index - 1] == BOX_S and d_lst[d_index - 1 - 1] != WALL: 
+                        d_lst[d_index - 1 - 1] = BOX_NS                 # move left and move box out of target
+                        number_targets += 1
+                        d_lst[d_index - 1] = SPRITE_T
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] = TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
+                        break                                           # add elif statement for when you walk over target
+        elif player_input == "w":                                         # w input
+            for index, d_lst in enumerate(board_copy):
+                for d_index, d_element in enumerate(d_lst):             
+                    if (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and board_copy[index - 1][d_index] == EMPTY:    # move up into empty space
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] == TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
+                        board_copy[index - 1][d_index] = SPRITE
+                        break
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and board_copy[index - 1][d_index] == TARGET:     # move up into target
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] == TARGET
+                        else:
+                            d_lst[d_index] = EMPTY
+                        board_copy[index - 1][d_index] = SPRITE_T
+                        break
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and board_copy[index - 1][d_index] == BOX_NS and board_copy[index - 2][d_index] != WALL:
+                        if board_copy[index - 2][d_index] == EMPTY:                 # move box up into empty space
+                            board_copy[index - 2][d_index] = BOX_NS
+                            board_copy[index - 1][d_index] = SPRITE
+                            if d_lst[d_index] == SPRITE_T:
+                                d_lst[d_index] == TARGET
+                            else:
+                                d_lst[d_index] = EMPTY
+                        if board_copy[index - 2][d_index] == TARGET:                 # move box up into target
+                            board_copy[index - 2][d_index] = BOX_S
+                            number_targets -= 1
+                            board_copy[index - 1][d_index] = SPRITE
+                            if d_lst[d_index] == SPRITE_T:
+                                d_lst[d_index] == TARGET
+                            else:
+                                d_lst[d_index] = EMPTY
+                        break
+                    elif (d_lst[d_index] == SPRITE or d_lst[d_index] == SPRITE_T) and board_copy[index - 1][d_index] == BOX_S and board_copy[index - 2][d_index] != WALL:
+                        board_copy[index - 1][d_index] = SPRITE_T
+                        board_copy[index - 2][d_index] = BOX_NS
+                        number_targets += 1
+                        if d_lst[d_index] == SPRITE_T:
+                            d_lst[d_index] == TARGET
+                        else:
+                            d_lst[d_index] = EMPTY                       # move box up out of target
+                        break
+        elif player_input == 's':
+            for i in range(len(board_copy)):
+                for index in range(len(board_copy[i])):
+                    if (board_copy[i][index] == SPRITE or board_copy[i][index] == SPRITE_T) and board_copy[i + 1][index] == EMPTY:
+                        if board_copy[i][index] == SPRITE_T:
+                            board_copy[i][index] == TARGET
+                        else:
+                            board_copy[i][index] = EMPTY
+                        board_copy[i + 1][index] = SPRITE
+                        c = False
+                    elif (board_copy[i][index] == SPRITE or board_copy[i][index] == SPRITE_T) and board_copy[i + 1][index] == TARGET:     # move down into target
+                        if board_copy[i][index] == SPRITE_T:
+                            board_copy[i][index] == TARGET
+                        else:
+                            board_copy[i][index] = EMPTY
+                        board_copy[i + 1][index] = SPRITE_T
+                        c = False
+                    elif (board_copy[i][index] == SPRITE or board_copy[i][index] == SPRITE_T) and board_copy[i + 1][index] == BOX_NS and board_copy[i + 1 + 1][index] != WALL:
+                        if board_copy[i + 1 + 1][index] == EMPTY:                 # move box down into empty space
+                            board_copy[i + 1 + 1][index] = BOX_NS
+                            board_copy[i + 1][index] = SPRITE
+                            if board_copy[i][index] == SPRITE_T:
+                                board_copy[i][index] == TARGET
+                            else:
+                                board_copy[i][index] = EMPTY
+                        elif board_copy[i + 1 + 1][index] == TARGET:                 # move box down into target
+                            board_copy[i + 1 + 1][index] = BOX_S
+                            board_copy[i + 1][index] = SPRITE
+                            number_targets -= 1
+                            if board_copy[i][index] == SPRITE_T:
+                                board_copy[i][index] == TARGET
+                            else:
+                                board_copy[i][index] = EMPTY
+                        c = False
+                    elif (board_copy[i][index] == SPRITE or board_copy[i][index] == SPRITE_T) and board_copy[i + 1][index] == BOX_S and board_copy[i + 1 + 1][index] != WALL:
+                        board_copy[i + 1][index] = SPRITE_T
+                        board_copy[i + 1 + 1][index] = BOX_NS
+                        number_targets += 1
+                        if board_copy[i][index] == SPRITE_T:
+                            board_copy[i][index] == TARGET
+                        else:
+                            board_copy[i][index] = EMPTY                          # move box down out of target
+                        c = False
+                if c == False:
+                    break 
+                    
+        for lst in range(len(board_copy)):                              # print out initial board without space at end
+            for i, e in enumerate(board_copy[lst]):
+                last_occur = max(i for i, e in enumerate(board_copy[lst]) if e == WALL)
+                if i == last_occur:
+                    print(f'{e}', end='')
+                else:
+                    print(f'{e} ', end='')
             print()
-        print()
-        player_input = input()                                           #print board after every every input that's not QUIT
-    else:
+        if number_targets == 0:
+            print('You Win!')    
+        else:
+            print()                                                         # print board after every every input that's not QUIT      
+        player_input = input()                                           
+    else:                                                               # if player inputs invalid move
         player_input = input('enter a valid move:\n')
-
-if player_input == QUIT:
-    print('\nGoodbye')                    
-
+if player_input == QUIT:                                                # if player inputs QUIT
+    print('Goodbye')
 
 
-# for lst in range(len(board_copy)):                                  #print out initial board
+
+
+
+
+
+
+# for lst in range(len(board_copy)):                                  # print out board
 #     for index, element in enumerate(board_copy[lst]):                        
 #         print(f'{element} ', end='')
 #     print()
 
 
-                        
+# for lst in range(len(TEST_CASE_15_BOARD)):                          # print out test 15 board
+#     for index, element in enumerate(TEST_CASE_15_BOARD[lst]):                        
+#         print(f'{element} ', end='')
+#     print()                       
 
 
 
